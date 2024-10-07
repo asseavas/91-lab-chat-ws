@@ -4,9 +4,9 @@ import cors from 'cors';
 import config from './config';
 import mongoose from 'mongoose';
 import usersRouter from './routes/users';
-import {WebSocket} from 'ws';
+import { WebSocket } from 'ws';
 import Message from './models/Message';
-import {IncomingMessage} from './types';
+import { IncomingMessage } from './types';
 import User from './models/User';
 
 const app = express();
@@ -27,8 +27,8 @@ chatRouter.ws('/', async (ws, req) => {
 
   let token = '';
 
-  const lastMessages = await Message.find().sort({createdAt: -1}).limit(30).populate('user', 'displayName');
-  ws.send(JSON.stringify({type: 'LAST_MESSAGES', payload: lastMessages}));
+  const lastMessages = await Message.find().sort({ createdAt: -1 }).limit(30).populate('user', 'displayName');
+  ws.send(JSON.stringify({ type: 'LAST_MESSAGES', payload: lastMessages }));
 
   ws.on('message', async (message) => {
     try {
@@ -38,25 +38,25 @@ chatRouter.ws('/', async (ws, req) => {
         token = decodedMessage.payload;
 
         if (decodedMessage.payload !== token) {
-          ws.send(JSON.stringify({type: 'ERROR', payload: 'Wrong token!'}));
+          ws.send(JSON.stringify({ type: 'ERROR', payload: 'Wrong token!' }));
           ws.close();
           return;
         }
 
-        const user = await User.findOne({token});
+        const user = await User.findOne({ token });
 
         if (!user || user.token !== token) {
-          ws.send(JSON.stringify({type: 'ERROR', payload: 'Invalid token'}));
+          ws.send(JSON.stringify({ type: 'ERROR', payload: 'Invalid token' }));
           ws.close();
           return;
         }
       }
 
-      if (decodedMessage.type === 'SET_MESSAGE' && token) {
-        const user = await User.findOne({token});
+      if (decodedMessage.type === 'SEND_MESSAGE' && token) {
+        const user = await User.findOne({ token });
 
         if (!user) {
-          ws.send(JSON.stringify({type: 'ERROR', payload: 'Invalid token'}));
+          ws.send(JSON.stringify({ type: 'ERROR', payload: 'Invalid token' }));
           return;
         }
 
@@ -80,7 +80,7 @@ chatRouter.ws('/', async (ws, req) => {
         });
       }
     } catch (error) {
-      ws.send(JSON.stringify({type: 'ERROR', payload: 'Invalid message'}));
+      ws.send(JSON.stringify({ type: 'ERROR', payload: 'Invalid message' }));
     }
   });
 
