@@ -8,18 +8,14 @@ export interface Message {
   createdAt: string;
 }
 
-export interface MessageMutation {
-  text: string;
-}
-
-export interface ChatMessage {
-  username: string;
-  text: string;
-}
-
 export interface IncomingMessage {
   type: string;
-  payload: ChatMessage;
+  payload: Message;
+}
+
+export interface IncomingMessages {
+  type: string;
+  payload: Message[];
 }
 
 export interface RegisterMutation {
@@ -38,6 +34,11 @@ export interface User {
   _id: string;
   username: string;
   token: string;
+  displayName: string;
+}
+
+export interface OnlineUser {
+  _id: string;
   displayName: string;
 }
 

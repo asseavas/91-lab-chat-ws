@@ -8,8 +8,16 @@ const AppToolbar = () => {
   const user = useAppSelector(selectUser);
 
   return (
-    <Box sx={{ flexGrow: 1, mt: 2, mb: 2 }}>
-      <AppBar position="sticky">
+    <Box sx={{ flexGrow: 1, mb: 2 }}>
+      <AppBar
+        position="sticky"
+        sx={{
+          background: '#2D343D66',
+          borderBottomLeftRadius: '15px',
+          borderBottomRightRadius: '15px',
+          boxShadow: 'none',
+        }}
+      >
         <Toolbar sx={{ margin: '0 24px' }}>
           <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
             <StyledLink to="/">Chat</StyledLink>

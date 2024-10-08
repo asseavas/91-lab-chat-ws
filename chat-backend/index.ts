@@ -20,6 +20,7 @@ app.use('/users', usersRouter);
 const chatRouter = express.Router();
 
 const connectedClients: WebSocket[] = [];
+let onlineUsers: { id: string; displayName: string | undefined }[] = [];
 
 chatRouter.ws('/', async (ws, req) => {
   connectedClients.push(ws);
@@ -44,6 +45,12 @@ chatRouter.ws('/', async (ws, req) => {
         }
 
         const user = await User.findOne({ token });
+
+        if (user) {
+          onlineUsers.push({ id: user._id.toString(), displayName: user.displayName });
+
+          broadcastOnlineUsers();
+        }
 
         if (!user || user.token !== token) {
           ws.send(JSON.stringify({ type: 'ERROR', payload: 'Invalid token' }));
@@ -72,8 +79,13 @@ chatRouter.ws('/', async (ws, req) => {
             JSON.stringify({
               type: 'NEW_MESSAGE',
               payload: {
-                username: user.displayName,
-                text: decodedMessage.payload,
+                _id: newMessage._id,
+                user: {
+                  _id: newMessage.user._id,
+                  displayName: user.displayName,
+                },
+                text: newMessage.text,
+                createdAt: newMessage.createdAt,
               },
             }),
           );
@@ -88,7 +100,18 @@ chatRouter.ws('/', async (ws, req) => {
     console.log('client disconnected');
     const index = connectedClients.indexOf(ws);
     connectedClients.splice(index, 1);
+
+    onlineUsers = onlineUsers.filter((user) => user.id !== token);
+
+    broadcastOnlineUsers();
   });
+
+  const broadcastOnlineUsers = () => {
+    const onlineUsersPayload = onlineUsers.map((user) => ({ id: user.id, displayName: user.displayName }));
+    connectedClients.forEach((clientWs) => {
+      clientWs.send(JSON.stringify({ type: 'ONLINE_USERS', payload: onlineUsersPayload }));
+    });
+  };
 });
 
 app.use('/chat', chatRouter);

@@ -1,4 +1,6 @@
-import {Model} from 'mongoose';
+import { Model } from 'mongoose';
+
+export interface Message {}
 
 export interface IncomingMessage {
   type: string;
